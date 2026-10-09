@@ -1,0 +1,186 @@
+---
+import { getCollection, render } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Specs from '../../components/Specs.astro';
+import { href, formatPrice } from '../../lib/url';
+import { TYPE_LABELS, STATUS_LABELS } from '../../lib/labels';
+
+export async function getStaticPaths() {
+  const pieces = await getCollection('pieces');
+  return pieces.map((piece) => ({ params: { slug: piece.id }, props: { piece } }));
+}
+
+const { piece } = Astro.props;
+const d = piece.data;
+const { Content } = await render(piece);
+const og = await getImage({ src: d.photos[0].src, width: 1200 });
+const forSale = d.status === 'for-sale';
+const inquire = href(`/inquire/?piece=${encodeURIComponent(piece.id)}&type=${forSale ? 'buy' : 'custom'}`);
+---
+
+<Base title={d.title} description={d.summary} image={og.src}>
+  <article class="piece wrap">
+    <a class="back link-arrow" href={href('/work/')}>All work</a>
+    <div class="piece__grid">
+      <div class="piece__gallery" data-gallery>
+        <div class="piece__main">
+          {
+            d.photos.map((p, i) => (
+              <Image
+                src={p.src}
+                alt={p.alt}
+                widths={[640, 1000, 1600]}
+                sizes="(max-width: 900px) 100vw, 60vw"
+                loading={i === 0 ? 'eager' : 'lazy'}
+                data-slide={i}
+                class:list={[{ 'is-active': i === 0 }]}
+              />
+            ))
+          }
+        </div>
+        {
+          d.photos.length > 1 && (
+            <div class="piece__thumbs" role="group" aria-label="Photos">
+              {d.photos.map((p, i) => (
+                <button type="button" data-thumb={i} aria-pressed={i === 0 ? 'true' : 'false'} aria-label={`Photo ${i + 1}: ${p.alt}`}>
+                  <Image src={p.src} alt="" width={160} />
+                </button>
+              ))}
+            </div>
+          )
+        }
+      </div>
+
+      <div class="piece__info">
+        <p class="eyebrow">{TYPE_LABELS[d.type]} · {STATUS_LABELS[d.status]}</p>
+        <h1>{d.title}</h1>
+        {d.placeholder && <p><span class="placeholder-note">Placeholder entry, not a real piece</span></p>}
+        {forSale && d.price && <p class="piece__price mono">{formatPrice(d.price)}</p>}
+        <p class="lede">{d.summary}</p>
+        <Specs
+          items={[
+            ['Wood', d.species],
+            ['Size', d.dimensions],
+            ['Base', d.base],
+            ['Finish', d.finish],
+            ['Year', String(d.year)],
+          ]}
+        />
+        <p class="piece__cta">
+          <a class="btn" href={inquire}>{forSale ? 'Inquire to buy' : 'Inquire about something like this'}</a>
+        </p>
+        <div class="prose">
+          <Content />
+        </div>
+      </div>
+    </div>
+  </article>
+</Base>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((g) => {
+    const slides = g.querySelectorAll<HTMLElement>('[data-slide]');
+    g.querySelectorAll<HTMLButtonElement>('[data-thumb]').forEach((btn) =>
+      btn.addEventListener('click', () => {
+        const i = btn.dataset.thumb;
+        slides.forEach((s) => s.classList.toggle('is-active', s.dataset.slide === i));
+        g.querySelectorAll('[data-thumb]').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      }),
+    );
+  });
+</script>
+
+<style>
+  .piece {
+    padding-top: var(--space-6);
+  }
+  .back {
+    display: inline-block;
+    margin-bottom: var(--space-5);
+    font-size: 0.9375rem;
+  }
+  .back::after {
+    content: '';
+  }
+  .back::before {
+    content: '← ';
+  }
+  .piece__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: var(--space-7);
+    align-items: start;
+  }
+  .piece__gallery {
+    position: sticky;
+    top: calc(var(--header-h) + var(--space-4));
+    display: grid;
+    gap: var(--space-3);
+  }
+  .piece__main {
+    display: grid;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--line);
+    aspect-ratio: 4 / 3;
+  }
+  .piece__main :global(img) {
+    grid-area: 1 / 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.35s;
+  }
+  .piece__main :global(img.is-active) {
+    opacity: 1;
+  }
+  .piece__thumbs {
+    display: flex;
+    gap: var(--space-2);
+    overflow-x: auto;
+  }
+  .piece__thumbs button {
+    flex: 0 0 auto;
+    width: 72px;
+    aspect-ratio: 1;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+    background: none;
+    cursor: pointer;
+    opacity: 0.6;
+  }
+  .piece__thumbs button[aria-pressed='true'] {
+    opacity: 1;
+    border-color: var(--ink);
+  }
+  .piece__thumbs :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .piece__info {
+    display: grid;
+    gap: var(--space-4);
+  }
+  .piece__info h1 {
+    font-size: var(--step-3);
+  }
+  .piece__price {
+    font-size: var(--step-2);
+  }
+  .piece__cta {
+    margin-block: var(--space-2);
+  }
+  @media (max-width: 900px) {
+    .piece__grid {
+      grid-template-columns: 1fr;
+    }
+    .piece__gallery {
+      position: static;
+    }
+  }
+</style>

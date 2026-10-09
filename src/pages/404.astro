@@ -1,0 +1,20 @@
+---
+import Base from '../layouts/Base.astro';
+import { href } from '../lib/url';
+---
+
+<Base title="Not found">
+  <section class="wrap--narrow nf">
+    <p class="eyebrow">404</p>
+    <h1>This page wandered off.</h1>
+    <p class="lede">It may have moved. Try the <a href={href('/work/')}>work</a> or head <a href={href('/')}>home</a>.</p>
+  </section>
+</Base>
+
+<style>
+  .nf {
+    display: grid;
+    gap: var(--space-4);
+    padding-block: var(--space-9);
+  }
+</style>

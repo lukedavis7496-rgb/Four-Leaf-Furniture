@@ -1,0 +1,86 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { href, formatPrice } from '../lib/url';
+import { TYPE_LABELS, STATUS_LABELS } from '../lib/labels';
+
+interface Props {
+  piece: CollectionEntry<'pieces'>;
+  showPrice?: boolean;
+}
+const { piece, showPrice = false } = Astro.props;
+const d = piece.data;
+const cover = d.photos[0];
+---
+
+<article class="card" data-type={d.type}>
+  <a href={href(`/work/${piece.id}/`)} class="card__link">
+    <div class="card__media">
+      <Image src={cover.src} alt={cover.alt} widths={[480, 800, 1200]} sizes="(max-width: 700px) 100vw, 400px" />
+      {d.status !== 'built' && <span class:list={['chip card__status', { 'chip--accent': d.status === 'for-sale' }]}>{STATUS_LABELS[d.status]}</span>}
+    </div>
+    <div class="card__body">
+      <div class="card__title">
+        <h3>{d.title}</h3>
+        {showPrice && d.price && <span class="mono">{formatPrice(d.price)}</span>}
+      </div>
+      <p class="card__meta mono">{TYPE_LABELS[d.type]} · {d.species} · {d.year}</p>
+      {d.placeholder && <span class="placeholder-note">Placeholder</span>}
+    </div>
+  </a>
+</article>
+
+<style>
+  .card__link {
+    display: grid;
+    gap: var(--space-4);
+    text-decoration: none;
+    color: inherit;
+  }
+  .card__link:hover {
+    color: inherit;
+  }
+  .card__media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--line);
+  }
+  .card__media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .card__link:hover .card__media :global(img) {
+    transform: scale(1.03);
+  }
+  .card__status {
+    position: absolute;
+    top: var(--space-3);
+    left: var(--space-3);
+    background: var(--paper);
+  }
+  .card__body {
+    display: grid;
+    gap: var(--space-1);
+  }
+  .card__title {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-3);
+  }
+  .card__title h3 {
+    font-size: var(--step-1);
+  }
+  .card__meta {
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+  .card__body .placeholder-note {
+    justify-self: start;
+    margin-top: var(--space-1);
+  }
+</style>

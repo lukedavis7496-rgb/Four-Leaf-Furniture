@@ -1,0 +1,54 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import PieceCard from '../components/PieceCard.astro';
+import { href } from '../lib/url';
+
+const forSale = (await getCollection('pieces', (p) => p.data.status === 'for-sale')).sort((a, b) => (a.data.price ?? 0) - (b.data.price ?? 0));
+---
+
+<Base title="Shop" description="One-of-a-kind live edge tables and furniture available now from Four Leaf Furniture.">
+  <PageHead eyebrow="Shop" title="Available now" lede="Every piece is one of a kind. When it's gone, it's gone. Pick one up or arrange delivery." />
+  <section class="wrap">
+    {
+      forSale.length ? (
+        <div class="grid">
+          {forSale.map((piece) => (
+            <PieceCard piece={piece} showPrice />
+          ))}
+        </div>
+      ) : (
+        <p class="lede">Nothing is available right now. New pieces show up here first, or ask about a commission.</p>
+      )
+    }
+  </section>
+  <section class="section">
+    <div class="wrap how">
+      <div>
+        <p class="eyebrow">How buying works</p>
+        <h2>Simple and personal.</h2>
+      </div>
+      <ol class="how__steps">
+        <li><strong>Ask.</strong> Use the button on any piece. I'll answer questions and send more photos or a video.</li>
+        <li><strong>Reserve.</strong> A deposit holds the piece for you. <span class="placeholder-note">TODO: your deposit terms</span></li>
+        <li><strong>Pick up or delivery.</strong> Local pickup, or delivery arranged by distance. <span class="placeholder-note">TODO: your area and rates</span></li>
+      </ol>
+      <p><a class="btn btn--ghost" href={href('/inquire/?type=buy')}>Ask about a piece</a></p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .how {
+    display: grid;
+    gap: var(--space-6);
+  }
+  .how__steps {
+    margin: 0;
+    padding-left: 1.2em;
+    display: grid;
+    gap: var(--space-4);
+    max-width: var(--measure);
+  }
+</style>
