@@ -1,0 +1,331 @@
+---
+/**
+ * Home page hero, in the style of Apple's product pages: the section pins
+ * while you scroll through it, the table pulls back and settles, and the
+ * lines of text arrive one at a time before the buttons.
+ *
+ * Media, in order of preference:
+ * - `sequence`: frames exported from a short orbit video of the table
+ *   (see README → "Upgrade the hero to an image sequence"). Scroll scrubs
+ *   through them on a <canvas>, so the table turns as you scroll.
+ * - otherwise the single photo in public/hero/.
+ *
+ * Without JavaScript, or with "reduce motion" on, it renders the finished,
+ * composed state with nothing pinned.
+ */
+import { href } from '../lib/url';
+import { site } from '../site.config';
+
+interface Props {
+  lines: string[];
+  /** Frame sequence: files `${dir}/${prefix}0001.webp` … up to `count`. */
+  sequence?: { dir: string; prefix: string; count: number; width: number; height: number };
+}
+const { lines, sequence } = Astro.props;
+const img = (name: string) => href(`/hero/${name}`);
+---
+
+<section class="hero" data-hero data-sequence={sequence ? JSON.stringify({ ...sequence, dir: href(sequence.dir) }) : undefined}>
+  <div class="hero__track" data-hero-track>
+    <div class="hero__stage">
+      <div class="hero__intro" data-hero-intro>
+        <p class="hero__kicker">{site.name}</p>
+        <h1>Furniture with<br />a living edge.</h1>
+      </div>
+
+      <div class="hero__media" data-hero-media>
+        {
+          sequence ? (
+            <canvas data-hero-canvas width={sequence.width} height={sequence.height} aria-label="A live edge table turning" role="img" />
+          ) : (
+            <picture>
+              <source type="image/webp" srcset={`${img('table-hero-black-960.webp')} 960w, ${img('table-hero-black-1600.webp')} 1600w, ${img('table-hero-black-2400.webp')} 2400w`} sizes="100vw" />
+              <img
+                src={img('table-hero-black-1600.jpg')}
+                srcset={`${img('table-hero-black-960.jpg')} 960w, ${img('table-hero-black-1600.jpg')} 1600w, ${img('table-hero-black-2400.jpg')} 2400w`}
+                sizes="100vw"
+                width="2400"
+                height="1350"
+                alt="A live edge slab table on black steel X legs."
+                fetchpriority="high"
+                decoding="async"
+              />
+            </picture>
+          )
+        }
+      </div>
+
+      <div class="hero__copy">
+        <ol class="hero__lines" data-hero-lines>
+          {lines.map((line) => <li>{line}</li>)}
+        </ol>
+        <div class="hero__ctas" data-hero-ctas>
+          <a class="btn hero__btn" href={href('/work/')}>See the work</a>
+          <a class="btn btn--ghost hero__btn hero__btn--ghost" href={href('/planner/')}>Plan your own build</a>
+        </div>
+      </div>
+
+      <div class="hero__cue" data-hero-cue aria-hidden="true"><span>Scroll</span></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  const hero = document.querySelector<HTMLElement>('[data-hero]')!;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (!reduce.matches) {
+    gsap.registerPlugin(ScrollTrigger);
+    hero.classList.add('hero--animate');
+
+    const q = <T extends Element>(sel: string) => hero.querySelector<T>(sel)!;
+    const media = q<HTMLElement>('[data-hero-media]');
+    const intro = q<HTMLElement>('[data-hero-intro]');
+    const cue = q<HTMLElement>('[data-hero-cue]');
+    const lines = [...hero.querySelectorAll<HTMLElement>('[data-hero-lines] li')];
+    const ctas = q<HTMLElement>('[data-hero-ctas]');
+
+    // Optional frame sequence: draw the frame for the current scroll position.
+    const seqData = hero.dataset.sequence ? JSON.parse(hero.dataset.sequence) : null;
+    let drawProgress: ((p: number) => void) | null = null;
+    if (seqData) {
+      const canvas = q<HTMLCanvasElement>('[data-hero-canvas]');
+      const ctx = canvas.getContext('2d')!;
+      const frames: HTMLImageElement[] = [];
+      const src = (i: number) => `${seqData.dir}/${seqData.prefix}${String(i + 1).padStart(4, '0')}.webp`;
+      let last = -1;
+      const draw = (i: number) => {
+        // Use the nearest frame that has loaded, so early scrolling isn't blank.
+        for (let d = 0; d < seqData.count; d++) {
+          for (const j of [i - d, i + d]) {
+            const f = frames[j];
+            if (f?.complete && f.naturalWidth) {
+              if (j !== last) ctx.drawImage(f, 0, 0, canvas.width, canvas.height);
+              last = j;
+              return;
+            }
+          }
+        }
+      };
+      // Load every 8th frame first, then fill in the rest.
+      const order = [...Array(seqData.count).keys()].sort((a, b) => (a % 8 === 0 ? 0 : 1) - (b % 8 === 0 ? 0 : 1) || a - b);
+      for (const i of order) {
+        const im = new Image();
+        im.decoding = 'async';
+        im.src = src(i);
+        if (i === 0) im.onload = () => draw(0);
+        frames[i] = im;
+      }
+      drawProgress = (p) => draw(Math.round(p * (seqData.count - 1)));
+    }
+
+    const mm = gsap.matchMedia();
+    mm.add({ wide: '(min-width: 900px)', narrow: '(max-width: 899px)' }, (c) => {
+      const wide = c.conditions!.wide;
+      gsap.set(lines, { autoAlpha: 0, y: 28 });
+      gsap.set(ctas, { autoAlpha: 0, y: 20 });
+      gsap.set(media, { scale: wide ? 1.55 : 2.1, yPercent: wide ? 10 : 6, xPercent: 0 });
+
+      const tl = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: {
+          trigger: '[data-hero-track]',
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.6,
+          onUpdate: drawProgress ? (st) => drawProgress!(st.progress) : undefined,
+        },
+      });
+
+      // 1. Pull back from the close-up to the whole table.
+      tl.to(cue, { autoAlpha: 0, duration: 0.08 }, 0)
+        .to(intro, { autoAlpha: 0, yPercent: -30, duration: 0.18 }, 0.02)
+        .to(media, { scale: 1, yPercent: 0, duration: 0.3 }, 0);
+
+      // 2. Make room for the words: left on wide screens, up on phones.
+      tl.to(media, wide ? { xPercent: -18, scale: 0.7, duration: 0.2 } : { yPercent: -14, scale: 1.12, duration: 0.2 }, 0.3);
+
+      // 3. The lines arrive one at a time; earlier ones step back.
+      lines.forEach((line, i) => {
+        const at = 0.42 + i * 0.13;
+        tl.to(line, { autoAlpha: 1, y: 0, duration: 0.09, ease: 'power2.out' }, at);
+        if (i > 0) tl.to(lines[i - 1], { opacity: 0.4, duration: 0.09 }, at);
+      });
+
+      // 4. Everything settles; the buttons come in.
+      const end = 0.42 + lines.length * 0.13;
+      tl.to(lines, { opacity: 1, duration: 0.06 }, end)
+        .to(ctas, { autoAlpha: 1, y: 0, duration: 0.08, ease: 'power2.out' }, end)
+        .to({}, { duration: 0.1 });
+    });
+  }
+</script>
+
+<style>
+  .hero {
+    background: var(--night);
+    color: var(--night-ink);
+    --muted: var(--night-muted);
+  }
+
+  /* ---- Composed, still layout (no JS / reduced motion) ------------------- */
+  .hero__stage {
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: var(--space-6);
+    padding: calc(var(--header-h) + var(--space-6)) var(--gutter) var(--space-8);
+    overflow: hidden;
+    text-align: center;
+  }
+  .hero__kicker {
+    font: 500 var(--step--1) / 1 var(--mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--night-muted);
+    margin-bottom: var(--space-4);
+  }
+  .hero__intro h1 {
+    font-size: var(--step-5);
+    letter-spacing: -0.045em;
+    line-height: 0.98;
+  }
+  .hero__media {
+    width: min(100%, 1400px);
+  }
+  .hero__media img,
+  .hero__media canvas {
+    width: 100%;
+    height: auto;
+  }
+  .hero__copy {
+    display: grid;
+    gap: var(--space-6);
+    justify-items: center;
+  }
+  .hero__lines {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .hero__lines li {
+    font-size: var(--step-3);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+  }
+  .hero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
+  }
+  .hero__btn {
+    background: var(--night-ink);
+    border-color: var(--night-ink);
+    color: var(--night);
+  }
+  .hero__btn--ghost {
+    background: transparent;
+    color: var(--night-ink);
+    border-color: color-mix(in srgb, var(--night-ink) 45%, transparent);
+  }
+  .hero__btn:hover {
+    background: #86b89b;
+    border-color: #86b89b;
+    color: var(--night);
+  }
+  .hero__cue {
+    display: none;
+  }
+
+  /* ---- Animated: pinned stage, layered pieces ---------------------------- */
+  .hero--animate .hero__track {
+    height: 420vh;
+  }
+  .hero--animate .hero__stage {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    min-height: 0;
+    padding: 0;
+    display: block;
+  }
+  .hero--animate .hero__intro {
+    position: absolute;
+    inset: calc(var(--header-h) + 6vh) var(--gutter) auto;
+    z-index: 2;
+  }
+  .hero--animate .hero__media {
+    position: absolute;
+    inset: 0;
+    width: auto;
+    display: grid;
+    place-items: center;
+    will-change: transform;
+  }
+  .hero--animate .hero__media picture,
+  .hero--animate .hero__media img,
+  .hero--animate .hero__media canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .hero--animate .hero__copy {
+    position: absolute;
+    z-index: 2;
+    inset: auto var(--gutter) 9vh;
+    justify-items: center;
+  }
+  .hero--animate .hero__cue {
+    position: absolute;
+    left: 50%;
+    bottom: 4vh;
+    translate: -50% 0;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2);
+    font: 500 var(--step--1) / 1 var(--mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--night-muted);
+  }
+  .hero--animate .hero__cue::after {
+    content: '';
+    width: 1px;
+    height: 36px;
+    background: linear-gradient(var(--night-muted), transparent);
+    animation: cue 1.8s ease-in-out infinite;
+  }
+  @keyframes cue {
+    0%,
+    100% {
+      transform: scaleY(0.4);
+      transform-origin: top;
+    }
+    50% {
+      transform: scaleY(1);
+      transform-origin: top;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .hero--animate .hero__copy {
+      inset: 0 var(--gutter) 0 auto;
+      width: min(40vw, 520px);
+      align-content: center;
+      justify-items: start;
+      text-align: left;
+    }
+    .hero--animate .hero__ctas {
+      justify-content: flex-start;
+    }
+  }
+</style>
