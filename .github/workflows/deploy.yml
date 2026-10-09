@@ -1,0 +1,49 @@
+name: Deploy site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build the planner into public/planner/app
+        run: npm run sync-planner
+      - name: Build the site
+        run: npm run build
+        env:
+          # Served from https://<user>.github.io/four-leaf-furniture/ until a
+          # custom domain is set up; then remove BASE_PATH and set SITE_URL
+          # to the domain (see README).
+          SITE_URL: https://lukedavis7496-rgb.github.io
+          BASE_PATH: /four-leaf-furniture/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
