@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.astro/
+.cache/
+# Built by `npm run sync-planner` (and in CI) from the planner repo.
+public/planner/app/
+.DS_Store

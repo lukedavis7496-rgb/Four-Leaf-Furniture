@@ -1,0 +1,88 @@
+---
+import Logo from './Logo.astro';
+import { site } from '../site.config';
+import { href } from '../lib/url';
+
+const socials = Object.entries(site.social).filter(([, url]) => url);
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="wrap site-footer__grid">
+    <div class="site-footer__brand stack">
+      <Logo />
+      <p class="muted">{site.tagline}</p>
+      <p class="muted mono">{site.location}</p>
+    </div>
+    <nav aria-label="Footer">
+      <p class="eyebrow">Explore</p>
+      <ul>
+        <li><a href={href('/work/')}>Work</a></li>
+        <li><a href={href('/shop/')}>Shop</a></li>
+        <li><a href={href('/learn/')}>Learn</a></li>
+        <li><a href={href('/planner/')}>Planner</a></li>
+        <li><a href={href('/about/')}>About</a></li>
+      </ul>
+    </nav>
+    <div>
+      <p class="eyebrow">Get in touch</p>
+      <ul>
+        <li><a href={href('/inquire/')}>Commissions &amp; inquiries</a></li>
+        <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
+        {
+          socials.map(([name, url]) => (
+            <li>
+              <a href={url} rel="me noopener">
+                {name.charAt(0).toUpperCase() + name.slice(1)}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+  <div class="wrap site-footer__base muted">
+    <span>© {year} {site.name}</span>
+    <span>Made by hand, one board at a time.</span>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--space-8);
+    padding-block: var(--space-7) var(--space-6);
+    border-top: 1px solid var(--line);
+    font-size: 0.9375rem;
+  }
+  .site-footer__grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: var(--space-6);
+  }
+  .site-footer ul {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-3) 0 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .site-footer ul a {
+    text-decoration: none;
+  }
+  .site-footer__base {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-7);
+    font-size: var(--step--1);
+  }
+  @media (max-width: 720px) {
+    .site-footer__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .site-footer__brand {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

@@ -1,0 +1,336 @@
+/*
+ * Four Leaf Furniture — design tokens and base styles.
+ * Minimal and photo-led: near-white paper, near-black ink, one clover-green
+ * accent used sparingly. The wood in the photos supplies the colour.
+ * Geist for everything; Geist Mono for specs (dimensions, species, prices).
+ */
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+
+:root {
+  --paper: #fbfaf8;
+  --surface: #ffffff;
+  --ink: #161513;
+  --ink-soft: #3a3835;
+  --muted: #6e6a63;
+  --line: #e7e4de;
+  --accent: #2e5b44;
+  --accent-ink: #ffffff;
+  --night: #000000;
+  --night-ink: #f5f3ef;
+  --night-muted: #9c978e;
+  --focus: #2e5b44;
+
+  --font: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --step--1: 0.8125rem;
+  --step-0: 1rem;
+  --step-1: 1.1875rem;
+  --step-2: clamp(1.4rem, 1.2rem + 0.8vw, 1.75rem);
+  --step-3: clamp(1.9rem, 1.5rem + 1.8vw, 2.75rem);
+  --step-4: clamp(2.6rem, 1.8rem + 3.6vw, 4.5rem);
+  --step-5: clamp(3.2rem, 2rem + 6vw, 7rem);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 5rem;
+  --space-9: 8rem;
+
+  --measure: 66ch;
+  --wide: 1200px;
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+  --radius: 10px;
+  --header-h: 64px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #0f0f0e;
+    --surface: #181816;
+    --ink: #f2f0ec;
+    --ink-soft: #d6d2cb;
+    --muted: #a19c93;
+    --line: #2a2926;
+    --accent: #86b89b;
+    --accent-ink: #0f0f0e;
+    --focus: #86b89b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --paper: #0f0f0e;
+  --surface: #181816;
+  --ink: #f2f0ec;
+  --ink-soft: #d6d2cb;
+  --muted: #a19c93;
+  --line: #2a2926;
+  --accent: #86b89b;
+  --accent-ink: #0f0f0e;
+  --focus: #86b89b;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--header-h) + 1rem);
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 var(--step-0) / 1.6 var(--font);
+  font-feature-settings: 'ss01';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+img {
+  height: auto;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+h1 {
+  font-size: var(--step-4);
+  letter-spacing: -0.035em;
+}
+h2 {
+  font-size: var(--step-3);
+  letter-spacing: -0.03em;
+}
+h3 {
+  font-size: var(--step-1);
+}
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+a:hover {
+  color: var(--accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+/* ---- Layout helpers ----------------------------------------------------- */
+.wrap {
+  width: min(100% - 2 * var(--gutter), var(--wide));
+  margin-inline: auto;
+}
+.wrap--narrow {
+  width: min(100% - 2 * var(--gutter), 760px);
+  margin-inline: auto;
+}
+.section {
+  padding-block: var(--space-8);
+}
+.section + .section {
+  border-top: 1px solid var(--line);
+}
+.stack > * + * {
+  margin-top: var(--space-4);
+}
+
+.eyebrow {
+  font: 500 var(--step--1) / 1.4 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.lede {
+  font-size: var(--step-1);
+  color: var(--ink-soft);
+  max-width: var(--measure);
+}
+.muted {
+  color: var(--muted);
+}
+.mono {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.section-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-6);
+}
+.section-head > div {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* ---- Buttons ------------------------------------------------------------ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-height: 44px;
+  padding: 0.65em 1.25em;
+  border-radius: 999px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font: 500 var(--step-0) / 1 var(--font);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+}
+.btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.btn--ghost {
+  background: transparent;
+  color: var(--ink);
+}
+.btn--ghost:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.link-arrow {
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.link-arrow::after {
+  content: ' →';
+}
+
+/* ---- Grids -------------------------------------------------------------- */
+.grid {
+  display: grid;
+  gap: var(--space-6) var(--space-5);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 0.7em;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font: 500 var(--step--1) / 1 var(--mono);
+  color: var(--muted);
+  white-space: nowrap;
+}
+.chip--accent {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.placeholder-note {
+  display: inline-block;
+  padding: 0.2em 0.6em;
+  border-radius: 6px;
+  background: color-mix(in srgb, #d99a2b 18%, transparent);
+  color: color-mix(in srgb, #8a5a00 80%, var(--ink));
+  font: 500 var(--step--1) / 1.4 var(--mono);
+}
+
+/* ---- Prose (articles, piece stories) ------------------------------------ */
+.prose {
+  max-width: var(--measure);
+  font-size: 1.0625rem;
+}
+.prose > * + * {
+  margin-top: 1.1em;
+}
+.prose h2 {
+  font-size: var(--step-2);
+  margin-top: 2em;
+}
+.prose h3 {
+  margin-top: 1.6em;
+}
+.prose ul,
+.prose ol {
+  padding-left: 1.2em;
+}
+.prose li + li {
+  margin-top: 0.4em;
+}
+.prose blockquote {
+  margin-inline: 0;
+  padding-left: 1em;
+  border-left: 2px solid var(--accent);
+  color: var(--ink-soft);
+}
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+.prose th,
+.prose td {
+  text-align: left;
+  padding: 0.5em 0.75em;
+  border-bottom: 1px solid var(--line);
+}
+.prose th {
+  font: 500 var(--step--1) / 1.4 var(--mono);
+  color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
