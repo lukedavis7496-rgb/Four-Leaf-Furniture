@@ -2,7 +2,7 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
-// GitHub Pages serves the site from /four-leaf-furniture/ until a custom
+// GitHub Pages serves the site from /Four-Leaf-Furniture/ until a custom
 // domain is set up; the deploy workflow passes BASE_PATH and SITE_URL.
 // Locally (and on a custom domain) the site lives at the root.
 export default defineConfig({

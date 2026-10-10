@@ -6,6 +6,9 @@
  *   npm run sync-planner                 # main branch
  *   PLANNER_REF=some-branch npm run sync-planner
  *   PLANNER_DIR=../Wood-Working-Renderer npm run sync-planner   # use a local checkout
+ *
+ * PLANNER_TOKEN (a GitHub token that can read the planner repo) is needed
+ * only while that repo is private.
  */
 import { execSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, rmSync } from 'node:fs';
@@ -22,7 +25,9 @@ if (!process.env.PLANNER_DIR) {
   rmSync(src, { recursive: true, force: true });
   mkdirSync(join(root, '.cache'), { recursive: true });
   console.log(`Cloning ${REPO} @ ${REF}`);
-  run(`git clone --depth 1 --branch ${REF} ${REPO} ${src}`, root);
+  const token = process.env.PLANNER_TOKEN;
+  const url = token ? REPO.replace('https://github.com/', `https://x-access-token:${token}@github.com/`) : REPO;
+  run(`git clone --depth 1 --branch ${REF} ${url} ${src}`, root);
 }
 console.log('Building the planner');
 run('npm ci --no-audit --no-fund', src);

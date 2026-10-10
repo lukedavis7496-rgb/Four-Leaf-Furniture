@@ -211,11 +211,20 @@ messages, so pick a service that answers JSON (most do).
 `.github/workflows/deploy.yml` builds the planner and the site on every push
 to `main` and publishes it to GitHub Pages. One-time setup:
 
-1. In the repo on GitHub: **Settings → Pages → Build and deployment →
-   Source: GitHub Actions**.
-2. Push to `main` (or run the workflow from the Actions tab).
+1. On a free GitHub account, Pages needs the repo to be **public**
+   (Settings → General → Danger Zone → Change visibility). Private repos
+   need GitHub Pro.
+2. Open <https://github.com/lukedavis7496-rgb/Four-Leaf-Furniture/settings/pages>
+   (or **Settings → Pages**; on a phone, the GitHub app has no Settings, so
+   use the browser) and under **Build and deployment** set
+   **Source: GitHub Actions**.
+3. If the planner repo (Wood-Working-Renderer) is private, the build can't
+   clone it on its own. Either make it public, or create a fine-grained
+   token with read access to its contents and add it as the
+   `PLANNER_TOKEN` secret (Settings → Secrets and variables → Actions).
+4. Push to `main` (or run the workflow from the Actions tab).
 
-The site is then at `https://lukedavis7496-rgb.github.io/four-leaf-furniture/`.
+The site is then at `https://lukedavis7496-rgb.github.io/Four-Leaf-Furniture/`.
 
 ### Custom domain
 
@@ -223,9 +232,8 @@ The site is then at `https://lukedavis7496-rgb.github.io/four-leaf-furniture/`.
    **Settings → Pages → Custom domain** (an `ALIAS`/`A` record for the bare
    domain, a `CNAME` for `www`).
 2. Enter the domain there and tick **Enforce HTTPS**.
-3. In `.github/workflows/deploy.yml`, set `SITE_URL` to
-   `https://yourdomain.com` and delete the `BASE_PATH` line (the site then
-   lives at the root).
+3. Run the workflow again. It asks GitHub for the site's address, so it
+   switches to the domain (served at the root) without any changes here.
 
 All internal links go through `href()` in `src/lib/url.ts`, so they follow
 the base path either way.
