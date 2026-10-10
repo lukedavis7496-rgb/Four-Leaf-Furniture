@@ -68,18 +68,27 @@ const links = [
 
 <style>
   .site-header {
+    --header-bg: color-mix(in srgb, var(--paper) 82%, transparent);
     position: sticky;
     top: 0;
     z-index: 50;
     height: var(--header-h);
-    background: color-mix(in srgb, var(--paper) 82%, transparent);
-    backdrop-filter: saturate(1.4) blur(14px);
-    -webkit-backdrop-filter: saturate(1.4) blur(14px);
     border-bottom: 1px solid transparent;
     transition:
-      background 0.3s,
       border-color 0.3s,
       color 0.3s;
+  }
+  /* The frosted glass sits on its own layer: a backdrop-filter on the header
+     itself would make Safari size the fixed mobile menu to the header bar. */
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--header-bg);
+    -webkit-backdrop-filter: saturate(1.4) blur(14px);
+    backdrop-filter: saturate(1.4) blur(14px);
+    transition: background 0.3s;
   }
   .site-header.is-scrolled {
     border-bottom-color: var(--line);
@@ -91,7 +100,7 @@ const links = [
   }
   .site-header--dark {
     color: var(--night-ink);
-    background: color-mix(in srgb, var(--night) 55%, transparent);
+    --header-bg: color-mix(in srgb, var(--night) 55%, transparent);
     border-bottom-color: transparent !important;
     --muted: var(--night-muted);
   }
@@ -176,6 +185,19 @@ const links = [
   @media (max-width: 820px) {
     .site-header__toggle {
       display: block;
+    }
+    /* The open menu is always a solid light sheet, header included, so it
+       reads clearly over the black hero and in dark mode alike. */
+    .site-header.is-open {
+      --paper: #fbfaf8;
+      --ink: #161513;
+      --line: #e7e4de;
+      --muted: #6e6a63;
+      --accent: #2e5b44;
+      --accent-ink: #ffffff;
+      --header-bg: var(--paper);
+      color: var(--ink);
+      border-bottom-color: var(--line) !important;
     }
     .site-nav {
       position: fixed;
