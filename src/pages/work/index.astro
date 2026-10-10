@@ -1,0 +1,21 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import PieceCard from '../../components/PieceCard.astro';
+import Filters from '../../components/Filters.astro';
+import { TYPE_LABELS } from '../../lib/labels';
+
+const pieces = (await getCollection('pieces')).sort((a, b) => Number(a.data.placeholder) - Number(b.data.placeholder) || b.data.year - a.data.year);
+const types = [...new Set(pieces.map((p) => p.data.type))].map((t) => ({ value: t, label: TYPE_LABELS[t] }));
+---
+
+<Base title="Work" description="Live edge tables and furniture built by Four Leaf Furniture.">
+  <PageHead eyebrow="Work" title="Everything I've built" lede="Each piece starts with the wood. Tap one for the full story, the wood, the size and how it was made." />
+  <section class="wrap">
+    <Filters attr="type" options={types} target="#work-grid" />
+    <div class="grid" id="work-grid">
+      {pieces.map((piece) => <PieceCard piece={piece} />)}
+    </div>
+  </section>
+</Base>

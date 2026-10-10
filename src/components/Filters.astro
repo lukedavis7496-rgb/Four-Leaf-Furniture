@@ -1,0 +1,64 @@
+---
+/**
+ * Filter buttons for a grid. Each card carries `data-<attr>` (space-separated
+ * values); the buttons show only matching cards. Without JS every card shows.
+ */
+interface Props {
+  attr: string;
+  options: { value: string; label: string }[];
+  target: string;
+}
+const { attr, options, target } = Astro.props;
+---
+
+<div class="filters" role="group" aria-label="Filter" data-filters={attr} data-target={target} hidden>
+  <button type="button" class="chip" aria-pressed="true" data-value="">All</button>
+  {
+    options.map((o) => (
+      <button type="button" class="chip" aria-pressed="false" data-value={o.value}>
+        {o.label}
+      </button>
+    ))
+  }
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-filters]').forEach((group) => {
+    group.hidden = false;
+    const attr = group.dataset.filters!;
+    const grid = document.querySelector(group.dataset.target!)!;
+    group.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-value]');
+      if (!btn) return;
+      const value = btn.dataset.value!;
+      group.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      grid.querySelectorAll<HTMLElement>(`[data-${attr}]`).forEach((card) => {
+        const values = (card.dataset[attr] ?? '').split(' ');
+        card.hidden = !!value && !values.includes(value);
+      });
+    });
+  });
+</script>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
+  }
+  .filters[hidden] {
+    display: none;
+  }
+  .filters button {
+    min-height: 36px;
+    padding: 0 0.95em;
+    background: none;
+    cursor: pointer;
+  }
+  .filters button[aria-pressed='true'] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+</style>

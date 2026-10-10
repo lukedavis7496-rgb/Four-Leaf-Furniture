@@ -1,0 +1,146 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import { href } from '../lib/url';
+import shop from '../assets/placeholders/about-shop.jpg';
+import early from '../assets/placeholders/about-early.jpg';
+import firstTable from '../content/pieces/first-live-edge-table/studio.jpg';
+---
+
+<Base title="About" description="The story behind Four Leaf Furniture and the journey from a first table to a small furniture business.">
+  <PageHead eyebrow="About" title="One table led to another." lede="How a first live edge slab turned into Four Leaf Furniture.">
+    <p><span class="placeholder-note">Every paragraph marked TODO is waiting for your words</span></p>
+  </PageHead>
+
+  <section class="wrap story">
+    <Image src={shop} alt="Placeholder: a photo of you in the shop." widths={[600, 1000]} sizes="(max-width: 900px) 100vw, 50vw" class="story__img" />
+    <div class="prose">
+      <h2>Hi, I'm [Your Name].</h2>
+      <p>
+        TODO: who you are in a few sentences. What you did before woodworking, what pulled you into it, and what you love about working with
+        slabs.
+      </p>
+      <p>TODO: where your shop is and what it's like: a garage, a corner of the basement, a shared space.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <p class="eyebrow">The journey</p>
+      <h2 class="journey__title">How it's gone so far</h2>
+      <ol class="journey">
+        <li>
+          <span class="journey__when mono">Before</span>
+          <div>
+            <h3>Learning the basics</h3>
+            <p class="muted">TODO: your first projects, who or what taught you, the tools you started with.</p>
+          </div>
+          <Image src={early} alt="Placeholder: an early project." width={480} class="journey__img" />
+        </li>
+        <li>
+          <span class="journey__when mono">2025</span>
+          <div>
+            <h3>The first table</h3>
+            <p class="muted">
+              A single live edge slab on black steel X legs, the piece that started it all. TODO: what you learned from it.
+            </p>
+            <p><a class="link-arrow" href={href('/work/first-live-edge-table/')}>See the table</a></p>
+          </div>
+          <Image src={firstTable} alt="The first table: a live edge slab on black steel X legs." width={480} class="journey__img" />
+        </li>
+        <li>
+          <span class="journey__when mono">Now</span>
+          <div>
+            <h3>Four Leaf Furniture</h3>
+            <p class="muted">
+              Building pieces to order and for sale, writing down what I learn, and sharing a free planner so others can start their own. TODO:
+              why "Four Leaf"?
+            </p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap values">
+      <div>
+        <p class="eyebrow">How I work</p>
+        <h2>What goes into every piece</h2>
+      </div>
+      <ul class="values__list">
+        <li><h3>The wood leads</h3><p class="muted">TODO: how you choose slabs and let the grain decide the design.</p></li>
+        <li><h3>Built to be used</h3><p class="muted">TODO: your approach to finishes, joinery and making things that last.</p></li>
+        <li><h3>Shared openly</h3><p class="muted">The <a href={href('/learn/')}>Learn</a> page and the <a href={href('/planner/')}>planner</a> are here so anyone can build their first table.</p></li>
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .story {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-7);
+    align-items: center;
+    padding-bottom: var(--space-8);
+  }
+  .story :global(.story__img),
+  .journey :global(.journey__img) {
+    width: 100%;
+    border-radius: var(--radius);
+  }
+  .journey__title {
+    margin: var(--space-3) 0 var(--space-7);
+  }
+  .journey {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-7);
+  }
+  .journey li {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr) minmax(0, 320px);
+    gap: var(--space-5);
+    align-items: start;
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--line);
+  }
+  .journey li > div {
+    display: grid;
+    gap: var(--space-3);
+  }
+  .journey__when {
+    color: var(--muted);
+    font-size: var(--step--1);
+    padding-top: 0.3em;
+  }
+  .values {
+    display: grid;
+    gap: var(--space-6);
+  }
+  .values__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: var(--space-6);
+  }
+  .values__list li {
+    display: grid;
+    gap: var(--space-2);
+  }
+  @media (max-width: 900px) {
+    .story {
+      grid-template-columns: 1fr;
+    }
+    .journey li {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+  }
+</style>

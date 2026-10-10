@@ -1,0 +1,43 @@
+---
+interface Props {
+  items: [string, string | undefined][];
+}
+const items = Astro.props.items.filter(([, v]) => v);
+---
+
+<dl class="specs">
+  {
+    items.map(([k, v]) => (
+      <div>
+        <dt>{k}</dt>
+        <dd>{v}</dd>
+      </div>
+    ))
+  }
+</dl>
+
+<style>
+  .specs {
+    margin: 0;
+    display: grid;
+    border-top: 1px solid var(--line);
+  }
+  .specs div {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    gap: var(--space-4);
+    padding-block: var(--space-3);
+    border-bottom: 1px solid var(--line);
+  }
+  dt {
+    font: 500 var(--step--1) / 1.6 var(--mono);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  dd {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 0.9375rem;
+  }
+</style>

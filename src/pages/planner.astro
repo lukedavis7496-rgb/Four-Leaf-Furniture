@@ -1,0 +1,95 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../site.config';
+import { href } from '../lib/url';
+
+const app = href(`/${site.plannerPath}`);
+---
+
+<Base title="Planner" description="A free woodworking planner: 3D model, cut list, lumber shopping list and assembly steps for tables and bookshelves.">
+  <section class="wrap planner-intro">
+    <div class="stack">
+      <p class="eyebrow">Free tool</p>
+      <h1>Plan your build.</h1>
+      <p class="lede">
+        Pick a table or bookshelf, enter the size, wood and joinery, and get a 3D model, a cut list with every piece lettered, the lumber to buy
+        with cutting diagrams, and the order to put it together. Live edge slabs get leg placement that leaves room for chairs.
+      </p>
+    </div>
+    <ul class="planner-intro__points">
+      <li><strong>Cut sizes from real geometry.</strong> Tenons, dados and glue-ups included.</li>
+      <li><strong>A real shopping list.</strong> Board feet, board sizes and cost.</li>
+      <li><strong>Saved in your browser.</strong> Keep several designs and tick off cuts in the shop.</li>
+    </ul>
+  </section>
+
+  <section class="planner-frame">
+    <div class="wrap planner-frame__bar">
+      <span class="muted">Works on phones too. More room on a laptop.</span>
+      <a class="link-arrow" href={app} target="_blank" rel="noopener">Open full screen</a>
+    </div>
+    <iframe src={app} title="Woodworking planner" loading="lazy" data-planner></iframe>
+    <p class="wrap planner-missing" data-planner-missing hidden>
+      <span class="placeholder-note">Planner not built yet</span> Run <code>npm run sync-planner</code> to fetch and build it into
+      <code>public/{site.plannerPath}</code>.
+    </p>
+  </section>
+</Base>
+
+<script>
+  // If the planner build isn't there (e.g. local dev before syncing), say so.
+  const frame = document.querySelector<HTMLIFrameElement>('[data-planner]')!;
+  fetch(frame.src, { method: 'HEAD' }).then(
+    (r) => {
+      if (!r.ok) {
+        frame.hidden = true;
+        document.querySelector<HTMLElement>('[data-planner-missing]')!.hidden = false;
+      }
+    },
+    () => {},
+  );
+</script>
+
+<style>
+  .planner-intro {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: var(--space-7);
+    align-items: end;
+    padding-block: var(--space-8) var(--space-6);
+  }
+  .planner-intro__points {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+    color: var(--ink-soft);
+  }
+  .planner-intro__points li {
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--line);
+  }
+  .planner-frame__bar {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    padding-bottom: var(--space-3);
+    font-size: 0.9375rem;
+  }
+  .planner-frame iframe {
+    display: block;
+    width: 100%;
+    height: calc(100svh - var(--header-h));
+    min-height: 600px;
+    border: 0;
+    border-block: 1px solid var(--line);
+    background: var(--paper);
+  }
+  @media (max-width: 900px) {
+    .planner-intro {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

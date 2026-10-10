@@ -1,0 +1,78 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { href } from '../lib/url';
+import { TAG_LABELS } from '../lib/labels';
+
+interface Props {
+  entry: CollectionEntry<'learn'>;
+}
+const { entry } = Astro.props;
+const d = entry.data;
+const date = d.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+---
+
+<article class="lcard" data-tags={d.tags.join(' ')}>
+  <a href={href(`/learn/${entry.id}/`)} class="lcard__link">
+    <div class="lcard__media">
+      <Image src={d.cover} alt={d.coverAlt} widths={[480, 800]} sizes="(max-width: 700px) 100vw, 400px" />
+      {
+        d.kind === 'video' && (
+          <span class="lcard__play" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18">
+              <path d="M8 5v14l11-7z" fill="currentColor" />
+            </svg>
+          </span>
+        )
+      }
+    </div>
+    <p class="eyebrow">{d.kind === 'video' ? 'Video' : 'Article'} · {date}</p>
+    <h3>{d.title}</h3>
+    <p class="muted">{d.summary}</p>
+    <div class="lcard__tags">
+      {d.tags.map((t) => <span class="chip">{TAG_LABELS[t]}</span>)}
+      {d.placeholder && <span class="placeholder-note">Placeholder</span>}
+    </div>
+  </a>
+</article>
+
+<style>
+  .lcard__link {
+    display: grid;
+    gap: var(--space-3);
+    text-decoration: none;
+    color: inherit;
+  }
+  .lcard__link:hover h3 {
+    color: var(--accent);
+  }
+  .lcard__media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--line);
+    margin-bottom: var(--space-2);
+  }
+  .lcard__media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .lcard__play {
+    position: absolute;
+    inset: auto auto var(--space-3) var(--space-3);
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    color: #111;
+  }
+  .lcard__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+</style>

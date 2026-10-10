@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import LearnCard from '../../components/LearnCard.astro';
+import Filters from '../../components/Filters.astro';
+import { TAG_LABELS } from '../../lib/labels';
+
+const entries = (await getCollection('learn')).sort((a, b) => +b.data.date - +a.data.date);
+const tags = [...new Set(entries.flatMap((e) => e.data.tags))].map((t) => ({ value: t, label: TAG_LABELS[t] }));
+---
+
+<Base title="Learn" description="Articles and videos on building live edge tables and getting started in woodworking.">
+  <PageHead
+    eyebrow="Learn"
+    title="Articles & videos"
+    lede="Everything I wish I'd known before my first table: choosing a slab, flattening it, finishing, and the small decisions that make a piece feel right."
+  />
+  <section class="wrap">
+    <Filters attr="tags" options={tags} target="#learn-grid" />
+    <div class="grid" id="learn-grid">
+      {entries.map((entry) => <LearnCard entry={entry} />)}
+    </div>
+  </section>
+</Base>
